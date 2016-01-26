@@ -1,9 +1,11 @@
 package com.example.ohrtsadok.popularmovies;
 
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,8 +36,10 @@ public class PopularMovieFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String type = preferences.getString("SortBy", "popular");
         GetMovieIds getMovieIds = new GetMovieIds();
-        getMovieIds.execute();
+        getMovieIds.execute(type);
     }
 
     @Override
@@ -44,7 +48,6 @@ public class PopularMovieFragment extends Fragment {
         moviesgrid = (GridView) rootView.findViewById(R.id.gridView);
         urls = new ArrayList<>();
         integerArrayList = new ArrayList<>();
-
 
         imageAdapter = new ImageAdapter(getActivity(), R.layout.imagelayout, urls);
         moviesgrid.setAdapter(imageAdapter);
@@ -114,15 +117,16 @@ public class PopularMovieFragment extends Fragment {
 
     }
 
-    public class GetMovieIds extends AsyncTask<Void, Void, ArrayList<String>> {
+    public class GetMovieIds extends AsyncTask<String, Void, ArrayList<String>> {
 
         @Override
-        protected ArrayList<String> doInBackground(Void... params) {
+        protected ArrayList<String> doInBackground(String... params) {
             ArrayList<Integer> ids = new ArrayList<>();
             ArrayList<String> theurls = new ArrayList<>();
-            final String baseUrl = "http://api.themoviedb.org/3/movie/popular";
+            final String baseUrl = "http://api.themoviedb.org/3/movie";
             final String apikey = "api_key";
-            Uri uri = Uri.parse(baseUrl).buildUpon().appendQueryParameter(apikey, BuildConfig.MovieDB_API_KEY).build();
+            Uri uri = Uri.parse(baseUrl).buildUpon().appendEncodedPath(params[0]).appendQueryParameter(apikey, BuildConfig.MovieDB_API_KEY).build();
+            Log.v("GetMovieIds", uri.toString());
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             JSONObject jsonresults;
