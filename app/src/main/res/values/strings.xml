@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">Popular Movies</string>
     <string name="action_settings">Settings</string>
+    <string name="sortbyKey">SortBy</string>
+    <string name="sortbyTitle">Sort by</string>
+    <string name="sortbyPopular">Popular</string>
+    <string name="sortbyHighRated">Highest Rated</string>
+    <array name="sortbyEntries">
+        <item>@string/sortbyPopular</item>
+        <item>@string/sortbyHighRated</item>
+    </array>
+    <array name="sortbyentryValues">
+        <item>popular</item>
+        <item>top_rated</item>
+    </array>
 </resources>
