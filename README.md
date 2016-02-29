@@ -2,7 +2,7 @@
 For Udacity, to show popular movies to user
 
 ##API Key Required
-For this app to work, you need an API key from themoviedb.org. You will need to create an account and 
+For this app to work, you need an API key from [TheMovieDb](https://www.themoviedb.org). You will need to create an account and 
 provide some personal information to get an API key.
 
 
