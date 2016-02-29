@@ -6,7 +6,7 @@ For this app to work, you need an API key from [TheMovieDb](https://www.themovie
 provide some personal information to get an API key.
 
 
-Add this code to the build.gradle file:
+Add this code to the app/build.gradle file:
 ```
 buildTypes.each {
         it.buildConfigField 'String', 'MovieDB_API_KEY', '"YourAPIkey"'
