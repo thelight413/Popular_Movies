@@ -1,192 +1,148 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ * Created by ohrtsadok on 1/24/16.
+ */
+
 package com.example.ohrtsadok.popularmovies;
 
-
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
-/**
- * Created by ohrtsadok on 1/24/16.
+/*
+ * Obtains Movie data and displays it in a GridView
  */
 public class PopularMovieFragment extends Fragment {
-    GridView moviesgrid;
-    ArrayList<String> urls;
-    ImageAdapter imageAdapter;
-    ArrayList<Integer> integerArrayList;
+    final String baseUrl = "http://api.themoviedb.org/3/movie";
+    final String apikey = "api_key";
+    public GridView movieGrid;
+    ImageAdapter mImageAdapter;
+    RequestQueue queue;
+    ArrayList<Movie> mMovieArrayList;
+    String type;
 
     @Override
     public void onStart() {
         super.onStart();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String type = preferences.getString("SortBy", "popular");
-        GetMovieIds getMovieIds = new GetMovieIds();
-        getMovieIds.execute(type);
+        mImageAdapter.clear();
+        queue = Volley.newRequestQueue(getActivity());
+        getMovieInfo();
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.pmfragment, container);
-        moviesgrid = (GridView) rootView.findViewById(R.id.gridView);
-        urls = new ArrayList<>();
-        integerArrayList = new ArrayList<>();
 
-        imageAdapter = new ImageAdapter(getActivity(), R.layout.imagelayout, urls);
-        moviesgrid.setAdapter(imageAdapter);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        type = preferences.getString("SortBy", "popular");
 
+        movieGrid = (GridView) rootView.findViewById(R.id.gridView);
+        mMovieArrayList = new ArrayList<>();
+        mImageAdapter = new ImageAdapter(getActivity(), R.layout.imagelayout, mMovieArrayList);
+        movieGrid.setAdapter(mImageAdapter);
+        movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), MovieDetailActivity.class);
+                intent.putExtra("Movie", mMovieArrayList.get(position));
+                startActivity(intent);
+
+            }
+        });
         return rootView;
     }
 
-    public String getImageURL(int id) {
-        final String baseUrl = "http://api.themoviedb.org/3/movie/";
-        final String apikey = "api_key";
-        String url = null;
-        Uri uri = Uri.parse(baseUrl).
-                buildUpon()
-                .appendEncodedPath(id + "/images")
-                .appendQueryParameter(apikey, BuildConfig.MovieDB_API_KEY)
-                .build();
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-        JSONObject jsonresults;
-        try {
-            URL moviedburl = new URL(uri.toString());
+    /*
+     * This will get the movies ids and calls the getIdInformation method
+     * to create the Movie objects to add to the MovieList.
+     */
+    public void getMovieInfo() {
 
-            urlConnection = (HttpURLConnection) moviedburl.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuilder stringBuilder = new StringBuilder();
-            if (inputStream == null) {
-                // Nothing to do.
-                return null;
-            }
+        Uri uri = Uri.parse(baseUrl).buildUpon().appendEncodedPath(type).appendQueryParameter(apikey, BuildConfig.MovieDB_API_KEY).build();
+        String url = uri.toString();
 
-            reader = new BufferedReader(new InputStreamReader(inputStream));
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging.
-                stringBuilder.append(line + "\n");
-            }
-
-            if (stringBuilder.length() == 0) {
-                // Stream was empty.  No point in parsing.
-                return null;
-            }
-            jsonresults = new JSONObject(stringBuilder.toString());
-            JSONArray resultsarray = jsonresults.getJSONArray("posters");
-            JSONObject jsonObject = resultsarray.getJSONObject(0);
-            url = jsonObject.getString("file_path");
-            Log.v("Url", url);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (urlConnection != null) {
-            urlConnection.disconnect();
-        }
-        if (reader != null) {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return url;
-
-    }
-
-    public class GetMovieIds extends AsyncTask<String, Void, ArrayList<String>> {
-
-        @Override
-        protected ArrayList<String> doInBackground(String... params) {
-            ArrayList<Integer> ids = new ArrayList<>();
-            ArrayList<String> theurls = new ArrayList<>();
-            final String baseUrl = "http://api.themoviedb.org/3/movie";
-            final String apikey = "api_key";
-            Uri uri = Uri.parse(baseUrl).buildUpon().appendEncodedPath(params[0]).appendQueryParameter(apikey, BuildConfig.MovieDB_API_KEY).build();
-            Log.v("GetMovieIds", uri.toString());
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            JSONObject jsonresults;
-            try {
-                URL moviedburl = new URL(uri.toString());
-
-                urlConnection = (HttpURLConnection) moviedburl.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuilder stringBuilder = new StringBuilder();
-                if (inputStream == null) {
-                    return null;
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-
-                    stringBuilder.append(line + "\n");
-                }
-
-                if (stringBuilder.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                jsonresults = new JSONObject(stringBuilder.toString());
-                JSONArray resultsarray = jsonresults.getJSONArray("results");
-                for (int i = 0; i < resultsarray.length(); i++) {
-                    JSONObject jsonArray = resultsarray.getJSONObject(i);
-                    ids.add(jsonArray.getInt("id"));
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (reader != null) {
+            @Override
+            public void onResponse(JSONObject response) {
                 try {
-                    reader.close();
-                } catch (IOException e) {
+                    JSONArray resultsarray = response.getJSONArray("results");
+                    for (int i = 0; i < resultsarray.length(); i++) {
+                        JSONObject jsonObject = resultsarray.getJSONObject(i);
+                        getIdInformation(jsonObject.getInt("id"));
+                    }
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }
-            for (int id : ids) {
-                theurls.add(getImageURL(id));
-            }
-            return theurls;
-        }
 
-        @Override
-        protected void onPostExecute(ArrayList<String> urls) {
-            for (String url : urls) {
-
-                imageAdapter.add(url);
 
             }
-        }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+
+        });
+
+        queue.add(jsonObjectRequest);
+
+
     }
+
+    /*
+     * Retrieves movie details from TheMovieDb Api and saves the information
+     * in a Movie object. That Movie object is then added to the Movie list.
+     */
+    public void getIdInformation(int id) {
+
+        Uri uri = Uri.parse(baseUrl).
+                buildUpon()
+                .appendEncodedPath(String.valueOf(id))
+                .appendQueryParameter(apikey, BuildConfig.MovieDB_API_KEY)
+                .build();
+
+        final JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, uri.toString(), null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Movie movie = new Movie();
+                movie.setInfo(response);
+                Log.v("movie", movie.getTitle());
+                mMovieArrayList.add(movie);
+                mImageAdapter.notifyDataSetChanged();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
+
+        queue.add(jsonObjectRequest);
+    }
+
 }
+
