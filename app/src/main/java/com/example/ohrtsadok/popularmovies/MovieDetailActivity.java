@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 /*
- * This activity is where the PopularMovieFragment will be created.
+ * This activity is where the MovieDetailFragment will be created.
  */
 public class MovieDetailActivity extends AppCompatActivity {
 
