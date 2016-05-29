@@ -38,7 +38,7 @@ public class Movie implements Parcelable {
     String releasedate;
     String vote;
     String runtime;
-
+    String trailerID;
     public Movie() {
 
     }
@@ -51,16 +51,17 @@ public class Movie implements Parcelable {
         vote = in.readString();
         releasedate = in.readString();
         runtime = in.readString();
+        trailerID = in.readString();
     }
 
     public void setInfo(JSONObject jsonObject) {
-        setId(jsonObject);
-        setPosterpath(jsonObject);
-        setReview(jsonObject);
-        setTitle(jsonObject);
-        setReleasedate(jsonObject);
-        setVote(jsonObject);
-        setRuntime(jsonObject);
+        setId(getIdFromJson(jsonObject));
+        setPosterpath(getPosterpathFromJSON(jsonObject));
+        setReview(getReviewFromJSON(jsonObject));
+        setTitle(getTitleFromJSON(jsonObject));
+        setReleasedate(getReleaseDateFromJSON(jsonObject));
+        setVote(getVoteFromJSON(jsonObject));
+        setRuntime(getRuntimeFromJSON(jsonObject));
 
     }
 
@@ -69,24 +70,35 @@ public class Movie implements Parcelable {
 
     }
 
-    public void setId(JSONObject jsonObject) {
+
+    public void setId(int id1) {
+        this.id = id1;
+    }
+
+    public int getIdFromJson(JSONObject jsonObject) {
+
         try {
-            this.id = jsonObject.getInt("id");
+            return jsonObject.getInt("id");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return 0;
     }
-
     public String getPosterpath() {
         return posterpath;
     }
 
-    public void setPosterpath(JSONObject jsonObject) {
+    public void setPosterpath(String imagePath) {
+        posterpath = imagePath;
+    }
+
+    public String getPosterpathFromJSON(JSONObject jsonObject) {
         try {
-            this.posterpath = jsonObject.getString("poster_path");
+            return jsonObject.getString("poster_path");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public String getReview() {
@@ -94,44 +106,60 @@ public class Movie implements Parcelable {
         return review;
     }
 
-    public void setReview(JSONObject jsonObject) {
+    public void setReview(String review) {
+        this.review = review;
+    }
+
+    public String getReviewFromJSON(JSONObject jsonObject) {
         try {
-            this.review = jsonObject.getString("overview");
+            return jsonObject.getString("overview");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(JSONObject jsonObject) {
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitleFromJSON(JSONObject jsonObject) {
         try {
-            this.title = jsonObject.getString("original_title");
+            return jsonObject.getString("original_title");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public String getReleasedate() {
         return releasedate;
     }
 
-    public void setReleasedate(JSONObject jsonObject) {
+    public void setReleasedate(String releasedate) {
+        this.releasedate = releasedate;
+
+
+    }
+
+    public String getReleaseDateFromJSON(JSONObject jsonObject) {
         try {
             String releasedate1 = jsonObject.getString("release_date");
             SimpleDateFormat format = new SimpleDateFormat("yy-MM-dd");
             Date date = format.parse(releasedate1);
             format.applyPattern("MMM dd, yyyy");
-            this.releasedate = format.format(date);
+            return format.format(date);
         } catch (JSONException e) {
 
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
+        return null;
 
     }
 
@@ -139,27 +167,36 @@ public class Movie implements Parcelable {
         return vote;
     }
 
-    public void setVote(JSONObject jsonObject) {
+    public void setVote(String vote) {
+        this.vote = vote;
+    }
+
+    public String getVoteFromJSON(JSONObject jsonObject) {
         try {
-            this.vote = jsonObject.getInt("vote_average") + "/10";
+            return jsonObject.getInt("vote_average") + "/10";
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public String getRuntime() {
         return runtime;
     }
 
-    public void setRuntime(JSONObject jsonObject) {
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
+    }
+
+    public String getRuntimeFromJSON(JSONObject jsonObject) {
         try {
             String runtime = jsonObject.getString("runtime");
-            this.runtime = runtime + "min";
+            return runtime + "min";
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
     }
-
     @Override
     public int describeContents() {
         return 0;
@@ -174,5 +211,6 @@ public class Movie implements Parcelable {
         dest.writeString(vote);
         dest.writeString(releasedate);
         dest.writeString(runtime);
+        dest.writeString(trailerID);
     }
 }
