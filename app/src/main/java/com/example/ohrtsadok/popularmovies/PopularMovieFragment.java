@@ -75,6 +75,8 @@ public class PopularMovieFragment extends Fragment implements LoaderManager.Load
         super.onStart();
         mImageAdapter.clear();
         queue = Volley.newRequestQueue(getActivity());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        type = preferences.getString("SortBy", "popular");
         if (!(type.equals("favorite"))) {
             getMovieInfo();
         } else {
@@ -87,8 +89,7 @@ public class PopularMovieFragment extends Fragment implements LoaderManager.Load
         View rootView = inflater.inflate(R.layout.pmfragment, container, false);
         movieDbHelper = new MovieDbHelper(getContext());
         db = movieDbHelper.getWritableDatabase();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        type = preferences.getString("SortBy", "popular");
+
 
         movieGrid = (GridView) rootView.findViewById(R.id.gridView);
         mMovieArrayList = new ArrayList<>();

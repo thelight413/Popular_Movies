@@ -94,37 +94,41 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             movie = intent.getParcelableExtra("Movie");
         }
         ll = (LinearLayout) rootView.findViewById(R.id.ll);
+        if (movie != null) {
+            favoriteB.setVisibility(View.VISIBLE);
+            titleTV.setText(movie.getTitle());
+            Toast.makeText(getContext(), movie.getVote(), Toast.LENGTH_SHORT).show();
+            ratingTV.setText(movie.getVote());
+            summaryTV.setText(movie.getReview());
+            runtimeTV.setText(movie.getRuntime());
+            releasedateTV.setText(movie.getReleasedate());
+            favoriteB.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ContentValues cv = new ContentValues();
+                    cv.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, movie.getId());
+                    cv.put(MovieContract.FavoriteEntry.COLUMN_POSTER_PATH, movie.getPosterpath());
+                    cv.put(MovieContract.FavoriteEntry.COLUMN_RELEASE_DATE, movie.getReleasedate());
+                    cv.put(MovieContract.FavoriteEntry.COLUMN_REVIEW, movie.getReview());
+                    cv.put(MovieContract.FavoriteEntry.COLUMN_RUNTIME, movie.getRuntime());
+                    cv.put(MovieContract.FavoriteEntry.COLUMN_TITLE, movie.getTitle());
+                    cv.put(MovieContract.FavoriteEntry.COLUMN_VOTE, movie.getVote());
+                    Uri uri = MovieContract.FavoriteEntry.buildFavoriteUri();
+                    getActivity().getContentResolver().insert(uri, cv);
+                    Toast.makeText(getContext(), "Added to Favorites", Toast.LENGTH_SHORT).show();
+                }
+            });
 
-        titleTV.setText(movie.getTitle());
-        Toast.makeText(getContext(), movie.getVote(), Toast.LENGTH_SHORT).show();
-        ratingTV.setText(movie.getVote());
-        summaryTV.setText(movie.getReview());
-        runtimeTV.setText(movie.getRuntime());
-        releasedateTV.setText(movie.getReleasedate());
-        favoriteB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ContentValues cv = new ContentValues();
-                cv.put(MovieContract.FavoriteEntry.COLUMN_MOVIE_ID, movie.getId());
-                cv.put(MovieContract.FavoriteEntry.COLUMN_POSTER_PATH, movie.getPosterpath());
-                cv.put(MovieContract.FavoriteEntry.COLUMN_RELEASE_DATE, movie.getReleasedate());
-                cv.put(MovieContract.FavoriteEntry.COLUMN_REVIEW, movie.getReview());
-                cv.put(MovieContract.FavoriteEntry.COLUMN_RUNTIME, movie.getRuntime());
-                cv.put(MovieContract.FavoriteEntry.COLUMN_TITLE, movie.getTitle());
-                cv.put(MovieContract.FavoriteEntry.COLUMN_VOTE, movie.getVote());
-                Uri uri = MovieContract.FavoriteEntry.buildFavoriteUri();
-                getActivity().getContentResolver().insert(uri, cv);
-                Toast.makeText(getContext(), "Added to Favorites", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        getLoaderManager().initLoader(TRAILERLOADER_ID, null, this);
+            getLoaderManager().initLoader(TRAILERLOADER_ID, null, this);
 
 
-
-        final String baseUrl = "http://image.tmdb.org/t/p/w185";
-        Uri uri = Uri.parse(baseUrl).buildUpon().appendEncodedPath(movie.getPosterpath()).build();
-        Picasso.with(getContext()).load(uri.toString()).into(posterIV);
+            final String baseUrl = "http://image.tmdb.org/t/p/w185";
+            Uri uri = Uri.parse(baseUrl).buildUpon().appendEncodedPath(movie.getPosterpath()).build();
+            Picasso.with(getContext()).load(uri.toString()).into(posterIV);
+        } else {
+            //Hide the favorite button
+            favoriteB.setVisibility(View.GONE);
+        }
         return rootView;
     }
 
@@ -161,6 +165,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl));
+                                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                                    startActivity(intent);
+                                }
                                 startActivity(intent);
                             }
                         });
