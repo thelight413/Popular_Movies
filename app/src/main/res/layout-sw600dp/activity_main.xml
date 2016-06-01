@@ -24,14 +24,15 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
-    <fragment
+
+    <FrameLayout
         android:id="@+id/fragment_container"
         android:name="com.example.ohrtsadok.popularmovies.PopularMovieFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2" />
 
-    <fragment
+    <FrameLayout
         android:id="@+id/MDFragment"
         android:name="com.example.ohrtsadok.popularmovies.MovieDetailFragment"
         android:layout_width="0dp"
