@@ -77,7 +77,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.moviedetailfragment, container);
+        View rootView = inflater.inflate(R.layout.moviedetailfragment, container, false);
         scrollView = (ScrollView) rootView.findViewById(R.id.scrollView);
         titleTV = (TextView) rootView.findViewById(R.id.tvTitle);
         ratingTV = (TextView) rootView.findViewById(R.id.tvRating);
@@ -89,6 +89,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         Bundle arguments = getArguments();
         if (arguments != null) {
             movie = arguments.getParcelable("Movie");
+
         } else {
             Intent intent = getActivity().getIntent();
             movie = intent.getParcelableExtra("Movie");
@@ -97,7 +98,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         if (movie != null) {
             favoriteB.setVisibility(View.VISIBLE);
             titleTV.setText(movie.getTitle());
-            Toast.makeText(getContext(), movie.getVote(), Toast.LENGTH_SHORT).show();
             ratingTV.setText(movie.getVote());
             summaryTV.setText(movie.getReview());
             runtimeTV.setText(movie.getRuntime());

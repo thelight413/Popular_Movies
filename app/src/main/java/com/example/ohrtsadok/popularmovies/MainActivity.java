@@ -25,22 +25,24 @@ public class MainActivity extends AppCompatActivity implements PopularMovieFragm
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, new PopularMovieFragment()).commit();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, new PopularMovieFragment(), "First").commit();
         if (findViewById(R.id.MDFragment) != null) {
-
             mTwoPane = true;
 
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.MDFragment, new MovieDetailFragment(), "DetailFragment")
+                        .add(R.id.MDFragment, new MovieDetailFragment(), "DetailFragment")
                         .commit();
+
             }
         } else {
+
             mTwoPane = false;
-            getSupportActionBar().setElevation(0f);
         }
+
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -8,7 +8,6 @@ package com.example.ohrtsadok.popularmovies;
 import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,6 +15,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +29,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.ohrtsadok.popularmovies.data.MovieContract;
-import com.example.ohrtsadok.popularmovies.data.MovieDbHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,8 +66,6 @@ public class PopularMovieFragment extends Fragment implements LoaderManager.Load
     RequestQueue queue;
     ArrayList<Movie> mMovieArrayList;
     String type;
-    MovieDbHelper movieDbHelper;
-    SQLiteDatabase db;
 
     @Override
     public void onStart() {
@@ -78,18 +75,17 @@ public class PopularMovieFragment extends Fragment implements LoaderManager.Load
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         type = preferences.getString("SortBy", "popular");
         if (!(type.equals("favorite"))) {
+
             getMovieInfo();
         } else {
             getLoaderManager().initLoader(FAVORITELOADER_ID, null, this);
+
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.pmfragment, container, false);
-        movieDbHelper = new MovieDbHelper(getContext());
-        db = movieDbHelper.getWritableDatabase();
-
 
         movieGrid = (GridView) rootView.findViewById(R.id.gridView);
         mMovieArrayList = new ArrayList<>();
@@ -100,8 +96,10 @@ public class PopularMovieFragment extends Fragment implements LoaderManager.Load
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ((Callback) getActivity()).OnItemSelected(mMovieArrayList.get(position));
 
+
             }
         });
+
         return rootView;
     }
 
@@ -256,6 +254,8 @@ public class PopularMovieFragment extends Fragment implements LoaderManager.Load
         cv.put(MovieContract.TrailerEntry.COLUMN_TRAILER_ID, trailerid);
         cv.put(MovieContract.TrailerEntry.COLUMN_TRAILER_TITLE, name);
         Uri uri = MovieContract.TrailerEntry.buildTrailerUri();
+        Log.v("cv", " " + cv.get(MovieContract.TrailerEntry.COLUMN_TRAILER_TITLE));
+
         getActivity().getContentResolver().insert(uri, cv);
     }
 
@@ -277,7 +277,7 @@ public class PopularMovieFragment extends Fragment implements LoaderManager.Load
      */
 
     @Override
-    public Loader onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri favoriteuri = MovieContract.FavoriteEntry.buildFavoriteUri();
         switch (id) {
             case FAVORITELOADER_ID:

@@ -1,13 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
-    android:divider="?android:attr/dividerHorizontal"
-    android:orientation="horizontal"
-    tools:context="com.example.ohrtsadok.popularmovies.MainActivity">
-
+    android:orientation="vertical">
     <!--
     This layout is a two-pane layout for the Items master/detail flow.
     -->
@@ -25,19 +22,24 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:divider="?android:attr/dividerHorizontal"
+        android:orientation="horizontal">
     <FrameLayout
         android:id="@+id/fragment_container"
-        android:name="com.example.ohrtsadok.popularmovies.PopularMovieFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2" />
+        android:layout_weight="3" />
 
-    <FrameLayout
-        android:id="@+id/MDFragment"
-        android:name="com.example.ohrtsadok.popularmovies.MovieDetailFragment"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="4"
-        tools:layout="@layout/moviedetailfragment" />
+        <FrameLayout
+            android:id="@+id/MDFragment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3" />
+    </LinearLayout>
+
 
 </LinearLayout>

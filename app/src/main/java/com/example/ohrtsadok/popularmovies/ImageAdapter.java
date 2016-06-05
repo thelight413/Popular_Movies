@@ -47,6 +47,7 @@ public class ImageAdapter extends ArrayAdapter<Movie> {
 
         Uri uri = Uri.parse(baseUrl).buildUpon().appendEncodedPath(mMovieArrayList.get(position).getPosterpath()).build();
         Picasso.with(mContext).load(uri.toString()).into(view);
+
         return view;
     }
 }
